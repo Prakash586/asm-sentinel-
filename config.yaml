@@ -1,0 +1,49 @@
+organization:
+  name: "Example Corp"
+  domains:
+    - "example.com"
+    - "example.org"
+  ips:
+    - "192.168.1.0/24"
+  
+discovery:
+  subdomain_tools: true
+  certificate_transparency: true
+  dns_bruteforce: true
+  cloud_assets: true
+  
+scanning:
+  ports:
+    - 21,22,23,25,53,80,110,111,135,139,143,443,445,993,995,1723,3306,3389,5900,8080,8443
+  threads: 50
+  timeout: 3
+  
+cloud:
+  aws: true
+  azure: true
+  gcp: true
+  
+monitoring:
+  ssl_check_days: 30
+  screenshot_interval: 86400
+  change_detection: true
+  
+risk_scoring:
+  weights:
+    internet_exposed: 10
+    admin_panel: 20
+    outdated_software: 30
+    expired_ssl: 15
+    default_login: 25
+    open_ports: 5
+    known_vulnerability: 40
+    
+notifications:
+  slack_webhook: ""  # Add your webhook
+  email:
+    enabled: false
+    smtp_server: ""
+    from_addr: ""
+    
+database:
+  path: "database/assets.db"
