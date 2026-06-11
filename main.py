@@ -118,4 +118,112 @@ class ASMSentinel:
                 risk_level = self.risk_scorer.get_risk_level(score)
                 risk_counts[risk_level] += 1
                 
-               
+                # Update asset with risk score
+                self.db.add_asset(host, 'subdomain', risk_score=score, risk_level=risk_level)
+                
+                # Send critical alerts
+                if risk_level == 'CRITICAL':
+                    self.notifier.send_critical_alert(
+                        host,
+                        'High Risk Asset',
+                        f"Risk score: {score}/100 - Immediate investigation required"
+                    )
+                    
+        # Step 10: Save scan history
+        duration = int(time.time() - self.start_time)
+        self.db.add_scan_history(
+            len(live_hosts),
+            len(live_hosts),
+            risk_counts['CRITICAL'],
+            risk_counts['HIGH'],
+            risk_counts['MEDIUM'],
+            risk_counts['LOW'],
+            duration
+        )
+        
+        # Step 11: Generate report
+        self._generate_summary_report(assets, port_results, risk_counts, duration)
+        
+        print(f"\n✅ Scan completed in {duration} seconds!")
+        print(f"   📊 Found {len(live_hosts)} live assets")
+        print(f"   🔴 Critical: {risk_counts['CRITICAL']}")
+        print(f"   🟠 High: {risk_counts['HIGH']}")
+        print(f"   🟡 Medium: {risk_counts['MEDIUM']}")
+        print(f"   🟢 Low: {risk_counts['LOW']}")
+        
+    def _is_live(self, host: str) -> bool:
+        """Check if a host is reachable"""
+        import socket
+        try:
+            socket.gethostbyname(host)
+            return True
+        except:
+            return False
+            
+    def _generate_summary_report(self, assets, ports, risk_counts, duration):
+        """Generate summary report"""
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        report_file = f"reports/asm_summary_{timestamp}.txt"
+        
+        os.makedirs('reports', exist_ok=True)
+        
+        with open(report_file, 'w') as f:
+            f.write("="*60 + "\n")
+            f.write("ASM SENTINEL SCAN REPORT\n")
+            f.write(f"Scan Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"Duration: {duration} seconds\n")
+            f.write("="*60 + "\n\n")
+            
+            f.write("ASSET SUMMARY\n")
+            f.write(f"Total Discovered: {len(assets)}\n")
+            f.write(f"Live Hosts: {len(ports)}\n\n")
+            
+            f.write("RISK DISTRIBUTION\n")
+            f.write(f"CRITICAL: {risk_counts['CRITICAL']}\n")
+            f.write(f"HIGH: {risk_counts['HIGH']}\n")
+            f.write(f"MEDIUM: {risk_counts['MEDIUM']}\n")
+            f.write(f"LOW: {risk_counts['LOW']}\n\n")
+            
+            f.write("TOP OPEN PORTS\n")
+            all_ports = []
+            for host_ports in ports.values():
+                all_ports.extend(host_ports)
+            from collections import Counter
+            for port, count in Counter(all_ports).most_common(10):
+                f.write(f"  Port {port}: {count} hosts\n")
+                
+        print(f"📄 Report saved: {report_file}")
+        
+    def start_scheduler(self):
+        """Start scheduled scanning"""
+        schedule.every().day.at("00:00").do(self.run_full_scan)
+        schedule.every().day.at("12:00").do(self.run_full_scan)
+        
+        print("⏰ Scheduler started. Running scans at 00:00 and 12:00 daily")
+        print("Press Ctrl+C to stop\n")
+        
+        try:
+            while True:
+                schedule.run_pending()
+                time.sleep(60)
+        except KeyboardInterrupt:
+            print("\n👋 Shutting down scheduler...")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='ASM Sentinel - Attack Surface Management Platform')
+    parser.add_argument('--scan', action='store_true', help='Run a single scan')
+    parser.add_argument('--dashboard', action='store_true', help='Start web dashboard')
+    parser.add_argument('--scheduler', action='store_true', help='Start scheduled scanning')
+    
+    args = parser.parse_args()
+    
+    asm = ASMSentinel()
+    
+    if args.scan:
+        asm.run_full_scan()
+    elif args.dashboard:
+        start_dashboard(asm.db)
+    elif args.scheduler:
+        asm.start_scheduler()
+    else:
+        parser.print_help()
