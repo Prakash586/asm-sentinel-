@@ -1,11 +1,18 @@
+# modules/db_manager.py
+
 import sqlite3
 import json
 from datetime import datetime
 from typing import List, Dict, Optional
+import os
 
 class DatabaseManager:
     def __init__(self, db_path: str):
         self.db_path = db_path
+        # Ensure database directory exists
+        db_dir = os.path.dirname(db_path)
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir)
         self.init_database()
         
     def init_database(self):
@@ -135,7 +142,8 @@ class DatabaseManager:
             
             conn.commit()
             cursor.execute('SELECT id FROM assets WHERE name = ? AND type = ?', (name, asset_type))
-            return cursor.fetchone()[0]
+            result = cursor.fetchone()
+            return result[0] if result else None
             
     def add_port(self, asset_id: int, port: int, service: str = '', protocol: str = 'tcp'):
         """Add open port for an asset"""
@@ -232,7 +240,7 @@ class DatabaseManager:
             return [dict(row) for row in cursor.fetchall()]
             
     def get_alerts(self, acknowledged: bool = False) -> List[Dict]:
-        """Get unacknowledged alerts"""
+        """Get alerts"""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
@@ -276,3 +284,17 @@ class DatabaseManager:
                 'total_ports': total_ports,
                 'vulnerabilities': vuln_count
             }
+            
+    def get_recent_scans(self, limit: int = 30) -> List[Dict]:
+        """Get recent scan history"""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT * FROM scan_history 
+                ORDER BY scan_date DESC 
+                LIMIT ?
+            ''', (limit,))
+            
+            return [dict(row) for row in cursor.fetchall()]
