@@ -40,7 +40,7 @@ ASM Sentinel is a professional Attack Surface Management platform that continuou
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/asm-sentinel.git
+git clone https://github.com/Prakash586/asm-sentinel.git
 cd asm-sentinel
 
 # Run automated setup (recommended)
