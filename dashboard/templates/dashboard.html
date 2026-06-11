@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ASM Sentinel Dashboard</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0a0e27;
+            color: #fff;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .assets-table {
+            margin: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .assets-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .assets-table th,
+        .assets-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .assets-table th {
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+        }
+        
+        .risk-critical {
+            color: #ff4757;
+            font-weight: bold;
+        }
+        
+        .risk-high {
+            color: #ffa502;
+        }
+        
+        .risk-medium {
+            color: #ffd32a;
+        }
+        
+        .risk-low {
+            color: #2ed573;
+        }
+        
+        .status-active {
+            color: #2ed573;
+        }
+        
+        .status-inactive {
+            color: #ff4757;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .loading {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ ASM Sentinel Dashboard</h1>
+        <p>Continuous Attack Surface Monitoring</p>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Assets</div>
+            <div class="stat-value" id="total-assets">0</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">Live Hosts</div>
+            <div class="stat-value" id="live-assets">0</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">Critical Risks</div>
+            <div class="stat-value" id="critical-risks">0</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">Last Scan</div>
+            <div class="stat-value" id="last-scan">-</div>
+        </div>
+    </div>
+    
+    <div class="assets-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Asset Name</th>
+                    <th>Type</th>
+                    <th>IP Address</th>
+                    <th>Status</th>
+                    <th>First Seen</th>
+                    <th>Last Seen</th>
+                </tr>
+            </thead>
+            <tbody id="assets-body">
+                <tr>
+                    <td colspan="6" style="text-align: center;">Loading assets...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        var socket = io();
+        
+        function updateDashboard(data) {
+            $('#total-assets').text(data.total_assets);
+            $('#live-assets').text(data.live_assets);
+            
+            // Update assets table
+            var tbody = $('#assets-body');
+            tbody.empty();
+            
+            if (data.assets && data.assets.length > 0) {
+                data.assets.forEach(function(asset) {
+                    var row = $('<tr>');
+                    row.append($('<td>').text(asset.name));
+                    row.append($('<td>').text(asset.type || '-'));
+                    row.append($('<td>').text(asset.ip || '-'));
+                    
+                    var statusClass = asset.status === 'active' ? 'status-active' : 'status-inactive';
+                    row.append($('<td>').html(`<span class="${statusClass}">${asset.status || 'unknown'}</span>`));
+                    
+                    row.append($('<td>').text(asset.first_seen ? new Date(asset.first_seen).toLocaleDateString() : '-'));
+                    row.append($('<td>').text(asset.last_seen ? new Date(asset.last_seen).toLocaleDateString() : '-'));
+                    
+                    tbody.append(row);
+                });
+            } else {
+                tbody.append('<tr><td colspan="6" style="text-align: center;">No assets found</td></tr>');
+            }
+            
+            $('#last-scan').text(new Date().toLocaleTimeString());
+        }
+        
+        socket.on('stats_update', function(data) {
+            updateDashboard(data);
+        });
+        
+        // Request initial update
+        socket.emit('request_update');
+        
+        // Refresh every 30 seconds
+        setInterval(function() {
+            socket.emit('request_update');
+        }, 30000);
+    </script>
+</body>
+</html>
