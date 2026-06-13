@@ -1,66 +1,101 @@
-# 🛡️ ASM Sentinel - Attack Surface Management Platform
+# 🐞 Bug Bounty Recon Automation Framework | Python
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://python.org)
-[![Security](https://img.shields.io/badge/security-ASM-red)](https://github.com/Prakash586/asm-sentinel)
-[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey)](https://github.com/Prakash586/asm-sentinel)
-[![GitHub stars](https://img.shields.io/github/stars/Prakash586/asm-sentinel)](https://github.com/Prakash586/asm-sentinel/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/Prakash586/asm-sentinel)](https://github.com/Prakash586/asm-sentinel/issues)
+[![Security](https://img.shields.io/badge/security-Bug%20Bounty-red)](#)
+[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey)](#)
 
-**ASM Sentinel** is a professional, enterprise-grade Attack Surface Management platform that continuously discovers, monitors, and assesses your organization's external attack surface. Built for security teams, bug bounty hunters, and MSSPs.
-
-## 📋 Table of Contents
-- [Features](#-features)
-- [Quick Start](#-quick-start)
-- [Installation Guide](#-installation-guide)
-  - [Linux (Ubuntu/Debian)](#linux-ubuntudebian)
-  - [Linux (RHEL/CentOS/Fedora)](#linux-rhelcentosfedora)
-  - [macOS](#macos)
-  - [Windows (WSL2)](#windows-wsl2)
-  - [Docker](#docker)
-  - [Termux (Android)](#termux-android)
-- [Configuration](#-configuration)
-- [Usage Examples](#-usage-examples)
-- [Architecture](#-architecture)
-- [Output & Reports](#-output--reports)
-- [Troubleshooting](#-troubleshooting)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
+A powerful Python-based reconnaissance automation framework designed for bug bounty hunters, penetration testers, and security researchers. The framework streamlines the reconnaissance phase by automating asset discovery, subdomain enumeration, technology fingerprinting, port scanning, screenshot collection, and vulnerability reconnaissance.
 
 ## 🚀 Features
 
-| Category | Features |
-|----------|----------|
-| **Asset Discovery** | Subdomain enumeration, DNS brute-force, crt.sh integration, Certificate Transparency logs |
-| **Network Scanning** | Multi-threaded port scanning, Service detection, Banner grabbing |
-| **Technology Detection** | Web server identification, Framework detection, CMS fingerprinting, Admin panel discovery |
-| **Security Monitoring** | SSL/TLS certificate analysis, Weak cipher detection, Certificate expiry tracking |
-| **Cloud Security** | Exposed S3 buckets, Azure blobs, GCP storage, Public repositories |
-| **Vulnerability Intelligence** | NVD CVE lookup, CISA KEV catalog integration, Technology-CVE mapping |
-| **Risk Assessment** | Customizable risk scoring, Priority-based remediation, Asset criticality ranking |
-| **Visualization** | Real-time web dashboard, HTML/JSON reports, Historical trend analysis |
-| **Alerting** | Slack integration, Email notifications, Critical finding alerts |
-| **Automation** | Scheduled scans, Continuous monitoring, Change detection |
+| Category                  | Features                                                                   |
+| ------------------------- | -------------------------------------------------------------------------- |
+| **Subdomain Enumeration** | Passive & active discovery, Certificate Transparency logs, DNS brute-force |
+| **DNS Reconnaissance**    | DNS records extraction, Zone transfer checks, Resolver validation          |
+| **Port Scanning**         | Fast TCP port scanning, Service detection, Banner grabbing                 |
+| **Web Recon**             | HTTP probing, Technology fingerprinting, Security header analysis          |
+| **Content Discovery**     | Directory & file enumeration, JavaScript collection                        |
+| **Screenshot Collection** | Automated screenshots of live assets                                       |
+| **JavaScript Analysis**   | Endpoint extraction, Secret discovery, Sensitive data detection            |
+| **URL Collection**        | Historical URLs, Parameter discovery, Archive enumeration                  |
+| **Cloud Enumeration**     | S3 bucket discovery, Azure blob detection, GCP storage identification      |
+| **Reporting**             | JSON, CSV, and HTML reports with categorized findings                      |
+| **Automation**            | One-command reconnaissance workflow and scheduled scans                    |
 
 ## 📊 Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/Prakash586/asm-sentinel.git
-cd asm-sentinel
+git clone https://github.com/Prakash586/bug-bounty-recon.git
 
-# Run automated installation (recommended)
-chmod +x setup.sh
-./setup.sh
+# Navigate to project directory
+cd bug-bounty-recon
 
-# Configure your domains
-nano config.yaml
+# Install dependencies
+pip install -r requirements.txt
 
-# Run your first scan
-python main.py --scan
+# Run recon against a target
+python main.py -d example.com
 
-# Start the web dashboard
-python main.py --dashboard
+# Run full reconnaissance workflow
+python main.py -d example.com --full
 
-# Open your browser to http://localhost:5000
+# View results
+ls output/
+```
+
+## 🎯 Recon Workflow
+
+```text
+Target Domain
+      │
+      ▼
+Subdomain Enumeration
+      │
+      ▼
+Live Host Detection
+      │
+      ▼
+Port Scanning
+      │
+      ▼
+Technology Detection
+      │
+      ▼
+Screenshot Collection
+      │
+      ▼
+JavaScript Analysis
+      │
+      ▼
+URL & Parameter Discovery
+      │
+      ▼
+Report Generation
+```
+
+## 📁 Output Structure
+
+```text
+output/
+├── subdomains.txt
+├── live_hosts.txt
+├── ports.txt
+├── technologies.json
+├── screenshots/
+├── js_files.txt
+├── urls.txt
+├── parameters.txt
+└── report.html
+```
+
+## 🛠️ Use Cases
+
+* Bug Bounty Hunting
+* Attack Surface Mapping
+* External Asset Discovery
+* Red Team Reconnaissance
+* Web Application Assessments
+* Continuous Security Monitoring
+
