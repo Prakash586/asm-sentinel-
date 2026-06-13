@@ -27,7 +27,7 @@ A powerful Python-based reconnaissance automation framework designed for bug bou
 
 ```bash
 # Clone the repository
-git clone https://github.com/Prakash586/bug-bounty-recon.git
+git clone https://github.com/Prakash586/Bug-Bounty-Recon-Automation-Framework.git
 
 # Navigate to project directory
 cd bug-bounty-recon
